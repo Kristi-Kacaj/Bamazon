@@ -13,8 +13,17 @@ let connection = mysql.createConnection({
     database: 'bamazon_db'
 });
 
+//Create connection to the Bamazon database
+connection.connect(function(err) {
+    if (err) throw err;
+    startApp();
+});
 
-
-
-
-
+//Create function to start app
+const startApp= () => {
+    connection.query("SELECT * FROM products", (err,results)=>{
+        console.table(results);
+        let data= "facts";
+        selectFunc(data);
+    })
+}
