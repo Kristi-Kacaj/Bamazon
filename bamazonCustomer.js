@@ -23,7 +23,20 @@ connection.connect(function(err) {
 const startApp= () => {
     connection.query("SELECT * FROM products", (err,results)=>{
         console.table(results);
-        let data= "facts";
         selectFunc(data);
     })
+}
+
+//Function that uses inquirer npm to get user answer for id and stock quantity
+const selectFunc= () => {
+   inquirer
+    .prompt([{
+        name: "ID",
+        type: "input",
+        message: "What is the item ID of the product you would like to buy?"
+   }, {
+       name: "Quantity",
+       type: "input",
+       message: "How many would you like to buy?"
+   }]).then()
 }
