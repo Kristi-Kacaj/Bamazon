@@ -1,8 +1,8 @@
 //Required NPM packages
 require('dotenv').config()
-let mysql = require ("mysql");
-const { start } = require('repl');
-let inquirer = ("inquirer");
+let mysql = require("mysql");
+let inquirer = require("inquirer");
+
 
 //Create connection to the sql database
 let connection = mysql.createConnection({
@@ -21,9 +21,9 @@ connection.connect(function(err) {
 
 //Create function to start app
 const startApp= () => {
-    connection.query("SELECT * FROM products", (err,results)=>{
-        console.table(results);
-        selectFunc(data);
+    connection.query("SELECT * FROM products", (err,res)=>{
+        console.table(res);
+        selectFunc();
     })
 }
 
@@ -38,5 +38,25 @@ const selectFunc= () => {
        name: "Quantity",
        type: "input",
        message: "How many would you like to buy?"
-   }]).then()
-}
+   }]).then(function(answer) {
+    connection.query("SELECT * FROM products WHERE products.id = ?", [answer.itemID], function(err, res) {
+        if (res[0].item_id == answer.itemID && res[0].stock_quantity >= answer.Quantity) {
+            var TotalPrice = res[0].price * answer.Quantity;
+            console.log("Your purchase was successful.");
+            connection.query("UPDATE products SET ? WHERE ?", [{
+                stock_quantity: res[0].stock_quantity - answer.Quantity
+            }, {
+                id: res[0].item_id
+            }], function(err, res) {
+                console.log("You just spent: $" + TotalPrice);
+            });
+
+        } else if (res[0].item_id == answer.itemID && res[0].stock_quantity < answer.Quantity) {
+            console.log("Not enough is in stock at the moment.");
+            startApp();
+        }
+
+    });
+
+});
+};
