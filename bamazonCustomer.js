@@ -31,7 +31,7 @@ const startApp= () => {
 const selectFunc= () => {
    inquirer
     .prompt([{
-        name: "ID",
+        name: "itemID",
         type: "input",
         message: "What is the item ID of the product you would like to buy?"
    }, {
@@ -39,16 +39,21 @@ const selectFunc= () => {
        type: "input",
        message: "How many would you like to buy?"
    }]).then(function(answer) {
-    connection.query("SELECT * FROM products WHERE products.id = ?", [answer.itemID], function(err, res) {
+    connection.query("SELECT * FROM products WHERE products.item_id = ?", [answer.itemID], function(err, res) {
+       
+       if(err)throw err
         if (res[0].item_id == answer.itemID && res[0].stock_quantity >= answer.Quantity) {
             var TotalPrice = res[0].price * answer.Quantity;
             console.log("Your purchase was successful.");
             connection.query("UPDATE products SET ? WHERE ?", [{
                 stock_quantity: res[0].stock_quantity - answer.Quantity
             }, {
-                id: res[0].item_id
-            }], function(err, res) {
+                item_id: res[0].item_id
+            }], function(err, results) {
+                if(err)throw err
                 console.log("You just spent: $" + TotalPrice);
+                connection.end()
+                process.exit(0)
             });
 
         } else if (res[0].item_id == answer.itemID && res[0].stock_quantity < answer.Quantity) {
